@@ -6,6 +6,7 @@ import {
     Toolbar,
     Typography,
   } from "@mui/material";
+  import AuthModal from "./Authentication/AuthModal";
   import { createTheme, ThemeProvider } from "@mui/material/styles";
   import { useNavigate } from "react-router-dom";
   import { CryptoState } from "../CryptoContext";
@@ -24,7 +25,7 @@ import {
   });
   
   function Header() {
-    const { currency, setCurrency } = CryptoState();
+    const { currency, setCurrency,user } = CryptoState();
     const navigate = useNavigate();
   
     return (
@@ -46,20 +47,24 @@ import {
                 Crypto Hunter
               </Typography>
               <Select
-                variant="outlined"
-                value={currency}
-                sx={{ width: 100, height: 40, marginLeft: 2, color: "white" }}
-                onChange={(e) => setCurrency(e.target.value)}
-              >
-                <MenuItem value={"USD"}>USD</MenuItem>
-                <MenuItem value={"INR"}>INR</MenuItem>
-              </Select>
-            </Toolbar>
-          </Container>
-        </AppBar>
-      </ThemeProvider>
-    );
-  }
+              variant="outlined"
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={currency}
+              style={{ width: 85, height: 40 }}
+              onChange={(e) => setCurrency(e.target.value)}
+            >
+              <MenuItem value={"USD"}>USD</MenuItem>
+              <MenuItem value={"INR"}>INR</MenuItem>
+            </Select>
+
+            {user ? <UserSidebar /> : <AuthModal />}
+          </Toolbar>
+        </Container>
+      </AppBar>
+    </ThemeProvider>
+  );
+}
   
   export default Header;
   

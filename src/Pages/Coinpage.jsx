@@ -1,94 +1,170 @@
-import { LinearProgress, Typography, Container } from "@mui/material";
+import { Button, LinearProgress, Typography, Box } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import parse from "html-react-parser";
+
 import CoinInfo from "../components/CoinInfo";
 import { SingleCoin } from "../config/api";
 import { numberWithCommas } from "../components/CoinsTable";
 import { CryptoState } from "../CryptoContext";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../config/firebaseConfig";
 
 const CoinPage = () => {
   const { id } = useParams();
   const [coin, setCoin] = useState();
-  const { currency, symbol } = CryptoState();
+
+  const { currency, symbol, user, setAlert, watchlist } = CryptoState();
 
   const fetchCoin = async () => {
     const { data } = await axios.get(SingleCoin(id));
     setCoin(data);
   };
 
+  const inWatchlist = watchlist ? watchlist.includes(coin?.id) : false;
+
+  const addToWatchlist = async () => {
+    const coinRef = doc(db, "watchlist", user.uid);
+    try {
+      await setDoc(
+        coinRef,
+        { coins: watchlist ? [...watchlist, coin?.id] : [coin?.id] },
+        { merge: true }
+      );
+
+      setAlert({
+        open: true,
+        message: `${coin.name} Added to the Watchlist!`,
+        type: "success",
+      });
+    } catch (error) {
+      setAlert({
+        open: true,
+        message: error.message,
+        type: "error",
+      });
+    }
+  };
+
+  const removeFromWatchlist = async () => {
+    const coinRef = doc(db, "watchlist", user.uid);
+    try {
+      await setDoc(
+        coinRef,
+        { coins: watchlist.filter((wish) => wish !== coin?.id) },
+        { merge: true }
+      );
+
+      setAlert({
+        open: true,
+        message: `${coin.name} Removed from the Watchlist!`,
+        type: "success",
+      });
+    } catch (error) {
+      setAlert({
+        open: true,
+        message: error.message,
+        type: "error",
+      });
+    }
+  };
+
   useEffect(() => {
     fetchCoin();
-  }, [id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!coin) return <LinearProgress sx={{ backgroundColor: "gold" }} />;
 
   return (
-    <Container sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, mt: 3 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        alignItems: { xs: "center", md: "flex-start" },
+        gap: 2,
+        padding: 3,
+      }}
+    >
       {/* Sidebar */}
-      <Container
+      <Box
         sx={{
           width: { xs: "100%", md: "30%" },
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          borderRight: "2px solid grey",
-          paddingY: 3,
+          borderRight: { md: "2px solid grey" },
+          padding: 2,
         }}
       >
-        <img src={coin?.image.large} alt={coin?.name} height="200" style={{ marginBottom: 20 }} />
-
-        <Typography variant="h3" sx={{ fontWeight: "bold", mb: 2, fontFamily: "Montserrat" }}>
+        <img
+          src={coin?.image.large}
+          alt={coin?.name}
+          height="200"
+          style={{ marginBottom: 20 }}
+        />
+        <Typography variant="h3" sx={{ fontWeight: "bold", mb: 2 }}>
           {coin?.name}
         </Typography>
+        <Typography variant="subtitle1" sx={{ textAlign: "justify", px: 2 }}>
+          {parse(coin?.description.en.split(". ")[0])}.
+        </Typography>
 
-        {/* Coin Description */}
-        <Typography
-          variant="subtitle1"
-          sx={{
-            width: "100%",
-            fontFamily: "Montserrat",
-            paddingX: 3,
-            textAlign: "justify",
-          }}
-          dangerouslySetInnerHTML={{ __html: coin?.description?.en.split(". ")[0] + "." }}
-        />
-
-        {/* Market Data */}
-        <Container
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            alignItems: { xs: "center", md: "start" },
-            paddingY: 3,
-          }}
-        >
-          <Typography variant="h5" sx={{ fontWeight: "bold", fontFamily: "Montserrat" }}>
+        <Box sx={{ width: "100%", mt: 3 }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
             Rank:{" "}
-            <Typography component="span" variant="h5" sx={{ fontFamily: "Montserrat" }}>
+            <span style={{ fontWeight: "normal" }}>
               {numberWithCommas(coin?.market_cap_rank)}
-            </Typography>
+            </span>
           </Typography>
 
-          <Typography variant="h5" sx={{ fontWeight: "bold", fontFamily: "Montserrat", mt: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold", mt: 1 }}>
             Current Price:{" "}
-            <Typography component="span" variant="h5" sx={{ fontFamily: "Montserrat" }}>
-              {symbol} {numberWithCommas(coin?.market_data.current_price[currency.toLowerCase()])}
-            </Typography>
+            <span style={{ fontWeight: "normal" }}>
+              {symbol}{" "}
+              {numberWithCommas(
+                coin?.market_data.current_price[currency.toLowerCase()]
+              )}
+            </span>
           </Typography>
 
-          <Typography variant="h5" sx={{ fontWeight: "bold", fontFamily: "Montserrat", mt: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold", mt: 1 }}>
             Market Cap:{" "}
-            <Typography component="span" variant="h5" sx={{ fontFamily: "Montserrat" }}>
-              {symbol} {numberWithCommas(coin?.market_data.market_cap[currency.toLowerCase()].toString().slice(0, -6))}M
-            </Typography>
+            <span style={{ fontWeight: "normal" }}>
+              {symbol}{" "}
+              {numberWithCommas(
+                coin?.market_data.market_cap[currency.toLowerCase()]
+                  .toString()
+                  .slice(0, -6)
+              )}
+              M
+            </span>
           </Typography>
-        </Container>
-      </Container>
 
-      {/* Coin Chart Section */}
+          {user && (
+            <Button
+              variant="contained"
+              sx={{
+                width: "100%",
+                height: 40,
+                mt: 2,
+                backgroundColor: inWatchlist ? "#ff0000" : "#EEBC1D",
+                color: "black",
+                fontWeight: "bold",
+                "&:hover": { backgroundColor: inWatchlist ? "#d00000" : "#d4a217" },
+              }}
+              onClick={inWatchlist ? removeFromWatchlist : addToWatchlist}
+            >
+              {inWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
+            </Button>
+          )}
+        </Box>
+      </Box>
+
+      {/* Coin Info */}
       <CoinInfo coin={coin} />
-    </Container>
+    </Box>
   );
 };
 
