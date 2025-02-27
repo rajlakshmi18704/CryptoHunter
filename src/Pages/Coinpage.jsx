@@ -3,7 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import parse from "html-react-parser";
-
+import { toast } from "react-toastify";
 import CoinInfo from "../components/CoinInfo";
 import { SingleCoin } from "../config/api";
 import { numberWithCommas } from "../components/CoinsTable";
@@ -38,12 +38,15 @@ const CoinPage = () => {
         message: `${coin.name} Added to the Watchlist!`,
         type: "success",
       });
+      toast.success(`${coin.name} Added to the Watchlist!`, { position: "top-center" });
     } catch (error) {
+      toast.error(`${coin.name} Not added  to the Watchlist!`, { position: "top-center" });
       setAlert({
         open: true,
         message: error.message,
         type: "error",
       });
+      toast.error(error.message, { position: "bottom-center" });
     }
   };
 

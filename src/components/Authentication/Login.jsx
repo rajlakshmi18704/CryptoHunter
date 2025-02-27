@@ -1,81 +1,122 @@
-import { Box, Button, TextField } from "@mui/material";
 
-
-import { useState } from "react";
-import { CryptoState } from "../../CryptoContext";
-import { auth } from "../../config/firebaseConfig";
+import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../config/firebaseConfig";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
+import { CryptoState } from "../../CryptoContext";
+import {
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Link,
+} from "@mui/material";
+import SignInwithGoogle from "./signInWIthGoogle";
 
-const Login = ({ handleClose }) => {
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { setUser } = CryptoState();
+  const navigate = useNavigate();
 
-  const { setAlert } = CryptoState();
-
-  const handleSubmit = async () => {
-    if (!email || !password) {
-      setAlert({
-        open: true,
-        message: "Please fill all the Fields",
-        type: "error",
-      });
-      return;
-    }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
-      setAlert({
-        open: true,
-        message: `Sign Up Successful. Welcome ${result.user.email}`,
-        type: "success",
-      });
+      setUser(result.user); // Update user context
+      console.log("User logged in Successfully");
 
-      handleClose();
+      navigate("/");
+      toast.success("User logged in Successfully", { position: "top-center" });
     } catch (error) {
-      setAlert({
-        open: true,
-        message: error.message,
-        type: "error",
-      });
-      return;
+      console.error(error.message);
+      toast.error(error.message, { position: "bottom-center" });
     }
   };
 
   return (
-    <Box
-      p={3}
-      style={{
+    <Container
+      maxWidth="sm"
+      sx={{
+        minHeight: "100vh",
         display: "flex",
-        flexDirection: "column",
-        gap: "20px",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#121212", // Dark background
       }}
     >
-      <TextField
-        variant="outlined"
-        type="email"
-        label="Enter Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        fullWidth
-      />
-      <TextField
-        variant="outlined"
-        label="Enter Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        fullWidth
-      />
-      <Button
-        variant="contained"
-        size="large"
-        onClick={handleSubmit}
-        style={{ backgroundColor: "#EEBC1D" }}
+      <Paper
+        elevation={5}
+        sx={{
+          padding: 4,
+          backgroundColor: "#1E1E1E", // Dark theme
+          color: "white",
+          borderRadius: 2,
+        }}
       >
-        Login
-      </Button>
-    </Box>
+        <Typography variant="h4" component="h1" gutterBottom align="center">
+          Login
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="Email Address"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            InputLabelProps={{ style: { color: "#bbb" } }}
+            InputProps={{
+              style: { color: "white", backgroundColor: "#333", borderRadius: 5 },
+            }}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            InputLabelProps={{ style: { color: "#bbb" } }}
+            InputProps={{
+              style: { color: "white", backgroundColor: "#333", borderRadius: 5 },
+            }}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 3,
+              mb: 2,
+              backgroundColor: "#FFC107",
+              "&:hover": { backgroundColor: "#FFA000" },
+              color: "black",
+            }}
+          >
+            Login
+          </Button>
+          <Box sx={{ textAlign: "center", mb: 2 }}>
+            <Typography variant="body2">
+              New user?{" "}
+              <Link href="/Signup" underline="hover" sx={{ color: "#FFC107" }}>
+                Join Now
+              </Link>
+            </Typography>
+          </Box>
+          <SignInwithGoogle />
+        </Box>
+      </Paper>
+    </Container>
   );
-};
+}
 
 export default Login;
+
+

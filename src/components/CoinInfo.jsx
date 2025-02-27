@@ -30,7 +30,6 @@ const CoinInfo = ({ coin }) => {
   const { currency } = CryptoState();
   const [loading, setLoading] = useState(true);
 
-  // Fetch historical data
   const fetchHistoricData = useCallback(async () => {
     setLoading(true);
     try {
