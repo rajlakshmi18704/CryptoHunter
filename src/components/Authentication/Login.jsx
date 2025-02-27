@@ -14,7 +14,7 @@ import {
   Box,
   Link,
 } from "@mui/material";
-import SignInwithGoogle from "./SignInWIthGoogle";
+import SignInwithGoogle from "./SigninWithGoogle";
 
 function Login() {
   const [email, setEmail] = useState("");
