@@ -238,7 +238,7 @@ import {
   Link,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import SignInwithGoogle from "./signinWithGoogle";
+import SignInwithGoogle from "./SigninWithGoogle";
 import { toast } from "react-toastify";
 
 function Signup() {
