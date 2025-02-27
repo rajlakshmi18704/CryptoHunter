@@ -18,6 +18,7 @@ import SignInwithGoogle from "./SigninWithGoogle";
 
 function Login() {
   const [email, setEmail] = useState("");
+
   const [password, setPassword] = useState("");
   const { setUser } = CryptoState();
   const navigate = useNavigate();
@@ -105,9 +106,12 @@ function Login() {
           <Box sx={{ textAlign: "center", mb: 2 }}>
             <Typography variant="body2">
               New user?{" "}
-              <Link to="/signup" underline="hover" sx={{ color: "#FFC107" }}>
-                Join Now
-              </Link>
+              <span 
+      style={{ color: "#FFC107", cursor: "pointer", textDecoration: "underline" }} 
+      onClick={() => navigate("/signup")}
+    >
+      Join Now
+    </span>
             </Typography>
           </Box>
           <SignInwithGoogle />
