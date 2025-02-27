@@ -213,7 +213,7 @@ function Signup() {
           <SignInwithGoogle />
           <Typography textAlign="center" variant="body2" mt={2}>
             Already registered?{' '}
-            <Link href="/login" sx={{ color: "#FFC107" }}>Login</Link>
+            <Link to="/login" sx={{ color: "#FFC107" }}>Login</Link>
           </Typography>
         </Box>
       </Paper>
