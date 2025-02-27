@@ -105,7 +105,7 @@ function Login() {
           <Box sx={{ textAlign: "center", mb: 2 }}>
             <Typography variant="body2">
               New user?{" "}
-              <Link href="/Signup" underline="hover" sx={{ color: "#FFC107" }}>
+              <Link href="/signup" underline="hover" sx={{ color: "#FFC107" }}>
                 Join Now
               </Link>
             </Typography>
